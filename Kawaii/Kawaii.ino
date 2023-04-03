@@ -1,27 +1,60 @@
 #include <M5Core2.h>
 
 
-class GameClass {
-private:
+int gamemode = 0;
+
+int lcd_width = M5.Lcd.width();
+int lcd_height = M5.Lcd.height();
+
+class FaseClass {
 public:
+  void face_draw() {
+    eye();
+    mouth();
+    //表情を描画する
+  }
+
+  virtual void eye() const {
+    //目
+  }
+
+  virtual void mouth() const {
+  }
+};
+
+class FaseClassPeace : public FaseClass {
+public:
+  void eye() const override {
+  }
+  void mouth() const override {
+  }
+};
+
+// FaseClassPeace fase_class_peace;
+
+class GameClass {
+public:
+  int game_transition;
   virtual void game_loop() const;
 };
 
 class Kakurenbo : public GameClass {
+private:
 public:
+  int game_transition = 0;
   void game_loop() const override{
 
   };
 };
+
 class Darumasan : public GameClass {
 public:
+  int game_transition = 0;
   void game_loop() const override{
 
   };
 };
 
-
-int gamemode = 0;
 GameClass *game_class = nullptr;
 
 void setup() {
@@ -51,16 +84,3 @@ int gamemode_select() {
   }
   return 0;
 }
-
-class FaseControl {
-  void face_draw() {
-    //表情を描画する
-  }
-
-  void eye() {
-    //目
-  }
-
-  void mouth() {
-  }
-};
