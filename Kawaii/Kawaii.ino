@@ -51,7 +51,7 @@ public:
   }
 };
 
-// FaseClassPeace fase_class_peace;
+FaseClassPeace *fase_class_peace = new FaseClassPeace();
 
 class GameClass {
 public:
@@ -65,18 +65,19 @@ class Kakurenbo : public GameClass {
 private:
 public:
   int game_transition = 0;
-  int sec[4] = { 0, 30, 130, 140 };  //ゲーム進行の切り替え
+  int sec[5] = { 0, 10 ,30, 130, 140 };  //ゲーム進行の切り替え
 
   void game_sec0(){
-    M5.Lcd.printf("kakurenbo sec0\n", game_transition);
+    M5.Lcd.printf("kakurenbo sec0 \n", game_transition);
   }
   void game_sec1(){
-    M5.Lcd.printf("kakurenbo sec1\n", game_transition);
+    M5.Lcd.printf("kakurenbo sec1 \n", game_transition);
   }
 
   int then_loop_sec(time_t nt) {  //今どのセクションなのかを返す関数
     for (int i = 0; i < sizeof(sec) / sizeof(int); i++) {
-      if (sec[i] <= nt < sec[i + 1]) {
+      M5.Lcd.printf("game sec%d\n", sec[i]);
+      if (sec[i] <= nt && nt < sec[i + 1]) {
         return i;
       }
     }
@@ -84,7 +85,11 @@ public:
 
   void game_loop() override {
     time_t now_time = time(NULL);
-    switch (then_loop_sec(now_time)) {
+    M5.Lcd.printf("now_time:(%d) \n", now_time);
+    int tm = then_loop_sec(now_time);
+    M5.Lcd.printf("kakurenbo secTM(%d) \n", tm);
+
+    switch (tm) {
       case 0:
         game_sec0();
         break;
@@ -117,22 +122,21 @@ void setup() {
 
   // put your setup code here, to run once:
 }
-FaseClassPeace fase_class_peace = FaseClassPeace();
+// FaseClassPeace fase_class_peace = new FaseClassPeace();
 int count = 0;
 void loop() {  //ボタンの入力処理用
   M5.Lcd.setCursor(10, 10);
   count++;
-  M5.Lcd.printf("count    : [%d]\n", count);
-  M5.Lcd.printf("gamemode : [%d]\n", gamemode);
+  M5.Lcd.printf("count    : [%d] \n", count);
+  M5.Lcd.printf("gamemode : [%d] \n", gamemode);
   // M5.Lcd.fillRect(0, 0, lcd_width, lcd_height, BLACK);
   switch (gamemode) {
     case 0:
-      M5.Lcd.printf("case 0 input\n");
-
+      M5.Lcd.printf("case 0 input \n");
       gamemode = gamemode_select();
       break;
     case 1:  //かくれんぼ
-      M5.Lcd.printf("case 1 input\n");
+      M5.Lcd.printf("case 1 input \n");
       game_class->game_loop();
       gamemode = gamemode_end();
       break;
@@ -147,23 +151,24 @@ int gamemode_end() {
   M5.update();
 
   if (M5.BtnC.isPressed()) {
-    M5.Lcd.printf("gamemode_end\n");
+    M5.Lcd.printf("gamemode_end \n");
     return 0;
   }
   return gamemode;
 }
 
 int gamemode_select() {
-  M5.Lcd.printf("gamemode_select now input\n");
+  M5.Lcd.printf("gamemode_select now input \n");
   M5.update();
   if (M5.BtnA.isPressed()) {  //かくれんぼに誘導
+    fase_class_peace->clear();
     game_class = new Kakurenbo();
-    M5.Lcd.printf("gamemode_select 1 input\n");
+    M5.Lcd.printf("gamemode_select 1 input \n");
     return 1;
   }
   if (M5.BtnB.isPressed()) {  //ダルマさんが転んだに誘導
     game_class = new Darumasan();
-    M5.Lcd.printf("gamemode_select 2 input\n");
+    M5.Lcd.printf("gamemode_select 2 input \n");
     return 2;
   }
   return 0;
