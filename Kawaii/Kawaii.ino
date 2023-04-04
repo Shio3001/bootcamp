@@ -1,8 +1,23 @@
 #include <M5Core2.h>
+#include <time.h>
 
 
 //画面が縦向きの場合：高さ（240px）、幅（320px)
 //画面が横向きの場合：高さ（320px）、幅（240px）**
+
+int max_int(int a, int b) {
+  if (a > b) {
+    return a;
+  }
+  return b;
+}
+
+int min_int(int a, int b) {
+  if (a < b) {
+    return a;
+  }
+  return b;
+}
 
 int gamemode = 0;
 
@@ -41,23 +56,56 @@ public:
 class GameClass {
 public:
   int game_transition;
-  virtual void game_loop() const;
+  virtual void game_loop(){};
+  virtual void game_start(){};
+  void test_func(){};
 };
 
 class Kakurenbo : public GameClass {
 private:
 public:
   int game_transition = 0;
-  void game_loop() const override{
+  int sec[4] = { 0, 30, 130, 140 };  //ゲーム進行の切り替え
 
-  };
+  void game_sec0(){
+    M5.Lcd.printf("kakurenbo sec0\n", game_transition);
+  }
+  void game_sec1(){
+    M5.Lcd.printf("kakurenbo sec1\n", game_transition);
+  }
+
+  int then_loop_sec(time_t nt) {  //今どのセクションなのかを返す関数
+    for (int i = 0; i < sizeof(sec) / sizeof(int); i++) {
+      if (sec[i] <= nt < sec[i + 1]) {
+        return i;
+      }
+    }
+  }
+
+  void game_loop() override {
+    time_t now_time = time(NULL);
+    switch (then_loop_sec(now_time)) {
+      case 0:
+        game_sec0();
+        break;
+      case 1:
+        game_sec1();
+        break;
+    }
+  }
+
+  //最遅延限度設定として、タイマーの設定を利用する
+  //max / min 関数を利用して、進行が早ければ先先進められるようにすること ,
+
+  void game_start() override {
+    time_t start_time = time(NULL);
+  }
 };
 
 class Darumasan : public GameClass {
 public:
   int game_transition = 0;
-  void game_loop() const override{
-
+  void game_loop() override{
   };
 };
 
@@ -66,40 +114,43 @@ GameClass *game_class = nullptr;
 void setup() {
   M5.begin(true, true, true, true);
   M5.Lcd.setTextSize(2);
-  
+
   // put your setup code here, to run once:
 }
 FaseClassPeace fase_class_peace = FaseClassPeace();
 int count = 0;
 void loop() {  //ボタンの入力処理用
-M5.Lcd.setCursor(10, 10);
-count ++;
-M5.Lcd.printf("count    : [%d]\n",count);
-M5.Lcd.printf("gamemode : [%d]\n",gamemode);
-// M5.Lcd.fillRect(0, 0, lcd_width, lcd_height, BLACK);
+  M5.Lcd.setCursor(10, 10);
+  count++;
+  M5.Lcd.printf("count    : [%d]\n", count);
+  M5.Lcd.printf("gamemode : [%d]\n", gamemode);
+  // M5.Lcd.fillRect(0, 0, lcd_width, lcd_height, BLACK);
   switch (gamemode) {
     case 0:
       M5.Lcd.printf("case 0 input\n");
+
       gamemode = gamemode_select();
       break;
     case 1:  //かくれんぼ
       M5.Lcd.printf("case 1 input\n");
+      game_class->game_loop();
       gamemode = gamemode_end();
       break;
     case 2:  //ダルマさん
+      game_class->game_loop();
       gamemode = gamemode_end();
       break;
   }
 }
 
-int gamemode_end(){
-    M5.update();
+int gamemode_end() {
+  M5.update();
 
-    if (M5.BtnC.isPressed()){
-      M5.Lcd.printf("gamemode_end\n");
-      return 0;
-    }
-    return gamemode;
+  if (M5.BtnC.isPressed()) {
+    M5.Lcd.printf("gamemode_end\n");
+    return 0;
+  }
+  return gamemode;
 }
 
 int gamemode_select() {
@@ -108,7 +159,6 @@ int gamemode_select() {
   if (M5.BtnA.isPressed()) {  //かくれんぼに誘導
     game_class = new Kakurenbo();
     M5.Lcd.printf("gamemode_select 1 input\n");
-    delay(500);
     return 1;
   }
   if (M5.BtnB.isPressed()) {  //ダルマさんが転んだに誘導
