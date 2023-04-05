@@ -117,9 +117,9 @@ public:
   int face_draw_class_number = 0;
   void draw() override {
     this->run_draw_clear(face_draw_class_number);
-    // fill_rect_center_draw(-70, -40, 20, 100);
-    // fill_rect_center_draw(70, -40, 20, 100);
-    // fill_rect_center_draw(0, 60, 100, 20);
+    fill_rect_center_draw(-70, -40, 20, 100);
+    fill_rect_center_draw(70, -40, 20, 100);
+    fill_rect_center_draw(0, 60, 100, 20);
     text_center_draw(80,20,5,"!");
   }
 };
@@ -130,9 +130,10 @@ public:
   int face_draw_class_number = 1;
   void draw() override {
     this->run_draw_clear(face_draw_class_number);
-    fill_rect_center_draw(-70, -40, 20, 100);
-    fill_rect_center_draw(70, -40, 20, 100);
-    fill_rect_center_draw(0, 60, 100, 20);
+    fill_rect_center_draw(-70, -40, 20, 20);
+    fill_rect_center_draw(70, -40, 20, 20);
+    fill_rect_center_draw(0, 60, 150, 20);
+    text_center_draw(-120,90,3,"kakurenbo");
   }
 };
 
@@ -145,6 +146,7 @@ public:
     fill_rect_center_draw(-70, -40, 20, 100);
     fill_rect_center_draw(70, -40, 20, 100);
     fill_rect_center_draw(0, 60, 100, 20);
+    text_center_draw(-120,90,3,"search time");
   }
 };
 
@@ -156,24 +158,27 @@ public:
     fill_rect_center_draw(-70, -40, 20, 100);
     fill_rect_center_draw(70, -40, 20, 100);
     fill_rect_center_draw(0, 60, 100, 20);
+    text_center_draw(-120,90,3,"search time2");
   }
 };
 
-class FaseClass4 : public FaseClass {
+class FaseClass4 : public FaseClass { //見つからなかった顔
 public:
   int face_draw_class_number = 4;
   void draw() override {
     this->run_draw_clear(face_draw_class_number);
-    fill_rect_center_draw(-70, -40, 20, 100);
-    fill_rect_center_draw(70, -40, 20, 100);
+    fill_rect_center_draw(-70, -40, 100, 100);
+    fill_rect_center_draw(70, -40, 100, 100);
     fill_rect_center_draw(0, 60, 100, 20);
+    // text_center_draw(-120,90,3,"");
   }
 };
 
-class FaseClass102 : public FaseClass {
+class FaseClass102 : public FaseClass { //見つかっちゃった顔
 public:
   int face_draw_class_number = 102;
   void draw() override {
+    M5.Lcd.fillScreen(YELLOW);
     fill_rect_center_draw(-70, -40, 20, 100);
     fill_rect_center_draw(70, -40, 20, 100);
     fill_rect_center_draw(0, 60, 100, 20);
@@ -183,8 +188,9 @@ public:
 FaseClass *face_class_start_up = new FaseClassStartUp();
 FaseClass *fase_class0 = new FaseClass0();
 FaseClass *fase_class1 = new FaseClass1();
-FaseClass *fase_class3 = new FaseClass2();
-FaseClass *fase_class4 = new FaseClass3();
+FaseClass *fase_class2 = new FaseClass2();
+FaseClass *fase_class3 = new FaseClass3();
+FaseClass *fase_class4 = new FaseClass4();
 FaseClass *fase_class102 = new FaseClass102();
 
 class GameClass {
@@ -206,12 +212,13 @@ public:
     game_transition = v;
   }
 
-  int sec[6] = { 0, 10, 30, 50, 60, 10000 };  //ゲーム進行の切り替え
+  int sec[7] = { 0, 10, 30, 50, 60,100, 10000 };  //ゲーム進行の切り替え
 
   void game_sec0() {
     fase_class0->face_draw();
   }
   void game_sec1() {
+    fase_class1->face_draw();
     // fase_class2->face_draw();
   }
 
@@ -229,18 +236,21 @@ public:
     TouchPoint_t pos = M5.Touch.getPressPoint();
     const int xpos = pos.x;
     const int ypos = pos.y;
+    fase_class4->face_draw();
 
     if (xpos == -1) { return; };
-    set_game_transition(102);
-    set_operation_time();
+    game_exit();
   }
 
   void game_sec102() {  //ユーザー終了待機処理
     TouchPoint_t pos = M5.Touch.getPressPoint();
     const int xpos = pos.x;
     const int ypos = pos.y;
+    fase_class102->face_draw();
     if (xpos == -1) { return; };
     set_game_transition(900);
+
+    
     // fase_class1->face_draw();
   }
 
@@ -252,16 +262,16 @@ public:
 
   void game_sec2() {
     game_clear();
+    fase_class2->face_draw();
     // fase_class2->face_draw();
   }
   void game_sec3() {
     // M5.Speaker.beep();        // ビープ開始
     game_clear();
+    fase_class3->face_draw();
     // fase_class1->face_draw();
   }
-  void game_sec4() {
-    game_clear();
-  }
+
 
   int then_loop_sec(time_t nt) {  //今どのセクションなのかを返す関数
     for (int i = 0; i < sizeof(sec) / sizeof(int) - 1; i++) {
@@ -297,7 +307,7 @@ public:
         game_sec3();
         break;
       case 4:  //見つからなかった
-        game_sec4();
+        game_loss();
         break;
       case 102:  //見つかった！
 
