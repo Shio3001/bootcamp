@@ -1,7 +1,6 @@
 #include <M5Core2.h>
 #include <time.h>
 
-
 //画面が縦向きの場合：高さ（240px）、幅（320px)
 //画面が横向きの場合：高さ（320px）、幅（240px）**
 
@@ -9,10 +8,9 @@ int breadth = 5;
 bool debug = false;
 
 void lcd_clear() {
-
   int lcd_width = M5.Lcd.width();
   int lcd_height = M5.Lcd.height();
-  M5.Lcd.fillRect(0, 0, lcd_width, lcd_height, BLACK);
+  M5.Lcd.fillScreen(LIGHTGREY);
 }
 
 time_t last_operation_time;
@@ -62,6 +60,13 @@ public:
 
   int face_draw_class_number = -1;
 
+  void run_draw_clear(int this_number){
+    if (this_number != face_draw_number){
+      face_draw_number = this_number;
+      lcd_clear();
+    }
+  }
+
   virtual void draw() {
   }
 
@@ -97,14 +102,25 @@ public:
   // }
 };
 
+class FaseClassStartUp : public FaseClass {
+public:
+  int face_draw_class_number = 1000;
+  void draw() override {
+    this->run_draw_clear(face_draw_class_number);
+    text_center_draw(-120,100,2,"kakurenbo");
+  }
+};
+
+
 class FaseClass0 : public FaseClass {
 public:
   int face_draw_class_number = 0;
   void draw() override {
-    fill_rect_center_draw(-70, -40, 20, 100);
-    fill_rect_center_draw(70, -40, 20, 100);
-    fill_rect_center_draw(0, 60, 100, 20);
-    text_center_draw(80,20,3,!);
+    this->run_draw_clear(face_draw_class_number);
+    // fill_rect_center_draw(-70, -40, 20, 100);
+    // fill_rect_center_draw(70, -40, 20, 100);
+    // fill_rect_center_draw(0, 60, 100, 20);
+    text_center_draw(80,20,5,"!");
   }
 };
 
@@ -113,6 +129,7 @@ class FaseClass1 : public FaseClass {
 public:
   int face_draw_class_number = 1;
   void draw() override {
+    this->run_draw_clear(face_draw_class_number);
     fill_rect_center_draw(-70, -40, 20, 100);
     fill_rect_center_draw(70, -40, 20, 100);
     fill_rect_center_draw(0, 60, 100, 20);
@@ -124,6 +141,7 @@ class FaseClass2 : public FaseClass {
 public:
   int face_draw_class_number = 2;
   void draw() override {
+    this->run_draw_clear(face_draw_class_number);
     fill_rect_center_draw(-70, -40, 20, 100);
     fill_rect_center_draw(70, -40, 20, 100);
     fill_rect_center_draw(0, 60, 100, 20);
@@ -134,6 +152,7 @@ class FaseClass3 : public FaseClass {
 public:
   int face_draw_class_number = 3;
   void draw() override {
+    this->run_draw_clear(face_draw_class_number);
     fill_rect_center_draw(-70, -40, 20, 100);
     fill_rect_center_draw(70, -40, 20, 100);
     fill_rect_center_draw(0, 60, 100, 20);
@@ -144,6 +163,7 @@ class FaseClass4 : public FaseClass {
 public:
   int face_draw_class_number = 4;
   void draw() override {
+    this->run_draw_clear(face_draw_class_number);
     fill_rect_center_draw(-70, -40, 20, 100);
     fill_rect_center_draw(70, -40, 20, 100);
     fill_rect_center_draw(0, 60, 100, 20);
@@ -160,6 +180,7 @@ public:
   }
 };
 
+FaseClass *face_class_start_up = new FaseClassStartUp();
 FaseClass *fase_class0 = new FaseClass0();
 FaseClass *fase_class1 = new FaseClass1();
 FaseClass *fase_class3 = new FaseClass2();
@@ -188,7 +209,7 @@ public:
   int sec[6] = { 0, 10, 30, 50, 60, 10000 };  //ゲーム進行の切り替え
 
   void game_sec0() {
-    fase_class1->face_draw();
+    fase_class0->face_draw();
   }
   void game_sec1() {
     // fase_class2->face_draw();
@@ -331,11 +352,11 @@ void loop() {  //ボタンの入力処理用
   switch (gamemode) {
     case 0:
       gamemode = gamemode_select();
+      face_class_start_up->draw();
       break;
     case 1:  //かくれんぼ
       {
         game_class->game_loop();
-
         gamemode = gamemode_end();
         break;
       }
