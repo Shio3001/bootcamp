@@ -5,6 +5,13 @@
 //画面が縦向きの場合：高さ（240px）、幅（320px)
 //画面が横向きの場合：高さ（320px）、幅（240px）**
 
+int lcd_width = M5.Lcd.width();
+int lcd_height = M5.Lcd.height();
+
+void lcd_clear() {
+  M5.Lcd.fillRect(0, 0, lcd_width, lcd_height, BLACK);
+}
+
 time_t last_operation_time;
 void set_operation_time() {  //チャタリング対策
   last_operation_time = time(NULL);
@@ -37,37 +44,39 @@ int min_int(int a, int b) {
 
 int gamemode = 0;
 
-int lcd_width = M5.Lcd.width();
-int lcd_height = M5.Lcd.height();
-
 class FaseClass {
 public:
   void face_draw() {
     draw();
-    clear();
     //表情を描画する
   }
 
   virtual void draw() const {
-    //目
-  }
-
-  virtual void clear() const {
   }
 };
 
-class FaseClassPeace : public FaseClass {
+class FaseClass1 : public FaseClass {
 public:
   void draw() const override {
-    M5.Lcd.fillRect(10, 10, 10, 100, RED);
-    M5.Lcd.fillRect(300, 10, 10, 100, RED);
-  }
-  void clear() const override {
-    M5.Lcd.fillRect(0, 0, lcd_width, lcd_height, BLACK);
+    M5.Lcd.fillRect(50, 30, 5, 30, WHITE);
+    M5.Lcd.fillRect(70, 30, 5, 30, WHITE);
+    M5.Lcd.fillRect(60, 50, 30, 5, WHITE);
   }
 };
 
-FaseClassPeace *fase_class_peace = new FaseClassPeace();
+
+class FaseClass2 : public FaseClass {
+public:
+  void draw() const override {
+    M5.Lcd.fillRect(50, 30, 30, 5, WHITE);
+    M5.Lcd.fillRect(70, 30, 30, 5, WHITE);
+    M5.Lcd.fillRect(60, 50, 30, 5, WHITE);
+  }
+};
+
+
+FaseClass *fase_class1 = new FaseClass1();
+FaseClass *fase_class2 = new FaseClass2();
 
 class GameClass {
 public:
@@ -88,11 +97,13 @@ public:
     game_transition = v;
   }
 
-  int sec[5] = { 0, 10, 30, 50, 60 };  //ゲーム進行の切り替え
+  int sec[6] = { 0, 10, 30, 50, 60, 10000 };  //ゲーム進行の切り替え
 
   void game_sec0() {
+    fase_class1->face_draw();
   }
   void game_sec1() {
+    fase_class2->face_draw();
   }
 
   void game_clear() {  //見つかった時の処理
@@ -116,12 +127,14 @@ public:
   void game_exit() {  //ゲーム終了処理
     set_game_transition(0);
     gamemode = 0;
+    // M5.Speaker.end();
   }
 
   void game_sec2() {
     game_clear();
   }
   void game_sec3() {
+    // M5.Speaker.beep();        // ビープ開始
     game_clear();
   }
 
@@ -164,7 +177,7 @@ public:
       case 102:  //見つかった！
 
         if (get_operation_time()) {
-          game_sec102();                
+          game_sec102();
         }
 
 
@@ -172,7 +185,7 @@ public:
       case 900:  //終了関数
 
         game_exit();
-        fase_class_peace->clear();
+        clear();
 
 
         break;
@@ -184,6 +197,7 @@ public:
 
   void game_start() override {
     start_time = time(NULL);
+    // M5.Speaker.setVolume(4);
   }
 };
 
