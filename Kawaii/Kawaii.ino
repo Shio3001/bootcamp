@@ -5,13 +5,13 @@
 //画面が縦向きの場合：高さ（240px）、幅（320px)
 //画面が横向きの場合：高さ（320px）、幅（240px）**
 
-int lcd_width = M5.Lcd.width();
-int lcd_height = M5.Lcd.height();
-int lcd_width_center = lcd_width / 2;
-int lcd_height_center = lcd_height / 2;
 int breadth = 5;
+bool debug = false;
 
 void lcd_clear() {
+
+  int lcd_width = M5.Lcd.width();
+  int lcd_height = M5.Lcd.height();
   M5.Lcd.fillRect(0, 0, lcd_width, lcd_height, BLACK);
 }
 
@@ -25,6 +25,10 @@ bool get_operation_time() {
 }
 
 void debug_text(int row, String text) {
+  if (!debug) {
+    return;
+  }
+
   M5.Lcd.setCursor(10, 15 * row);
   // M5.Lcd.printf(text);
   // M5.Lcd.drawString(text,10,100*row);
@@ -47,6 +51,8 @@ int min_int(int a, int b) {
 
 int gamemode = 0;
 
+int face_draw_number = -1;
+
 class FaseClass {
 public:
   void face_draw() {
@@ -54,40 +60,111 @@ public:
     //表情を描画する
   }
 
-  virtual void draw() const {
+  int face_draw_class_number = -1;
+
+  virtual void draw() {
   }
 
-  int calculation_x(int shift_x){
-    return lcd_width_center - shift_x;
-  }
-  int calculation_y(int shift_y)
-    return lcd_height_center - shift_y;
+  void text_center_draw(int x, int y, int font_size, String text) {
+    int lcd_width = M5.Lcd.width();
+    int lcd_height = M5.Lcd.height();
+    int lcd_width_center = lcd_width / 2;
+    int lcd_height_center = lcd_height / 2;
+    M5.Lcd.setTextSize(font_size);
+    M5.Lcd.setTextColor(BLACK, BLACK);
+    M5.Lcd.drawString(text, lcd_width_center + x, lcd_height_center + y);
   }
 
+  void fill_rect_center_draw(int x, int y, int width, int height) {
+    int lcd_width = M5.Lcd.width();
+    int lcd_height = M5.Lcd.height();
+    int lcd_width_center = lcd_width / 2;
+    int lcd_height_center = lcd_height / 2;
+
+    int H_width = width / 2;
+    int H_height = height / 2;
+    //WHITE
+
+    M5.Lcd.fillRect(lcd_width_center + (x - H_width), lcd_height_center + (y - H_height), width, height, BLACK);  //（x1, y1) (x2, y2)
+  }
+
+
+  // int calculation_x(int shift_x) {
+  //   return lcd_width_center + shift_x;
+  // }
+  // int calculation_y(int shift_y) {
+  //   return lcd_height_center + shift_y;
+  // }
 };
+
+class FaseClass0 : public FaseClass {
+public:
+  int face_draw_class_number = 0;
+  void draw() override {
+    fill_rect_center_draw(-70, -40, 20, 100);
+    fill_rect_center_draw(70, -40, 20, 100);
+    fill_rect_center_draw(0, 60, 100, 20);
+    text_center_draw(80,20,3,!);
+  }
+};
+
 
 class FaseClass1 : public FaseClass {
 public:
-  void draw() const override {
-    M5.Lcd.fillRect(calculation_x(300), 130, 5, 30, WHITE);
-    M5.Lcd.fillRect(70, 130, 5, 30, WHITE);
-    M5.Lcd.fillRect(60, 150, 30, 5, WHITE);
+  int face_draw_class_number = 1;
+  void draw() override {
+    fill_rect_center_draw(-70, -40, 20, 100);
+    fill_rect_center_draw(70, -40, 20, 100);
+    fill_rect_center_draw(0, 60, 100, 20);
   }
 };
 
 
 class FaseClass2 : public FaseClass {
 public:
-  void draw() const override {
-    M5.Lcd.fillRect(50, 130, 30, 5, WHITE);
-    M5.Lcd.fillRect(70, 190, 30, 5, WHITE);
-    M5.Lcd.fillRect(60, 200, 30, 5, WHITE);
+  int face_draw_class_number = 2;
+  void draw() override {
+    fill_rect_center_draw(-70, -40, 20, 100);
+    fill_rect_center_draw(70, -40, 20, 100);
+    fill_rect_center_draw(0, 60, 100, 20);
   }
 };
 
+class FaseClass3 : public FaseClass {
+public:
+  int face_draw_class_number = 3;
+  void draw() override {
+    fill_rect_center_draw(-70, -40, 20, 100);
+    fill_rect_center_draw(70, -40, 20, 100);
+    fill_rect_center_draw(0, 60, 100, 20);
+  }
+};
 
+class FaseClass4 : public FaseClass {
+public:
+  int face_draw_class_number = 4;
+  void draw() override {
+    fill_rect_center_draw(-70, -40, 20, 100);
+    fill_rect_center_draw(70, -40, 20, 100);
+    fill_rect_center_draw(0, 60, 100, 20);
+  }
+};
+
+class FaseClass102 : public FaseClass {
+public:
+  int face_draw_class_number = 102;
+  void draw() override {
+    fill_rect_center_draw(-70, -40, 20, 100);
+    fill_rect_center_draw(70, -40, 20, 100);
+    fill_rect_center_draw(0, 60, 100, 20);
+  }
+};
+
+FaseClass *fase_class0 = new FaseClass0();
 FaseClass *fase_class1 = new FaseClass1();
-FaseClass *fase_class2 = new FaseClass2();
+FaseClass *fase_class3 = new FaseClass2();
+FaseClass *fase_class4 = new FaseClass3();
+FaseClass *fase_class102 = new FaseClass102();
 
 class GameClass {
 public:
@@ -114,7 +191,7 @@ public:
     fase_class1->face_draw();
   }
   void game_sec1() {
-    fase_class2->face_draw();
+    // fase_class2->face_draw();
   }
 
   void game_clear() {  //見つかった時の処理
@@ -127,7 +204,7 @@ public:
     set_operation_time();
   }
 
-  void game_loss(){ //見つからなかった時の処理
+  void game_loss() {  //見つからなかった時の処理
     TouchPoint_t pos = M5.Touch.getPressPoint();
     const int xpos = pos.x;
     const int ypos = pos.y;
@@ -137,13 +214,13 @@ public:
     set_operation_time();
   }
 
-  void game_sec102() { //ユーザー終了待機処理
+  void game_sec102() {  //ユーザー終了待機処理
     TouchPoint_t pos = M5.Touch.getPressPoint();
     const int xpos = pos.x;
     const int ypos = pos.y;
     if (xpos == -1) { return; };
     set_game_transition(900);
-    fase_class1->face_draw();
+    // fase_class1->face_draw();
   }
 
   void game_exit() {  //ゲーム終了処理
@@ -154,14 +231,16 @@ public:
 
   void game_sec2() {
     game_clear();
-    fase_class2->face_draw();
+    // fase_class2->face_draw();
   }
   void game_sec3() {
     // M5.Speaker.beep();        // ビープ開始
     game_clear();
-    fase_class1->face_draw();
+    // fase_class1->face_draw();
   }
-
+  void game_sec4() {
+    game_clear();
+  }
 
   int then_loop_sec(time_t nt) {  //今どのセクションなのかを返す関数
     for (int i = 0; i < sizeof(sec) / sizeof(int) - 1; i++) {
@@ -197,7 +276,7 @@ public:
         game_sec3();
         break;
       case 4:  //見つからなかった
-
+        game_sec4();
         break;
       case 102:  //見つかった！
 
@@ -238,7 +317,7 @@ GameClass *game_class = nullptr;
 void setup() {
   M5.begin(true, true, true, true);
   M5.Lcd.setTextSize(2);
-
+  M5.Lcd.fillScreen(LIGHTGREY);
   // put your setup code here, to run once:
 }
 // FaseClassPeace fase_class_peace = new FaseClassPeace();
