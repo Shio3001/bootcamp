@@ -7,6 +7,9 @@
 
 int lcd_width = M5.Lcd.width();
 int lcd_height = M5.Lcd.height();
+int lcd_width_center = lcd_width / 2;
+int lcd_height_center = lcd_height / 2;
+int breadth = 5;
 
 void lcd_clear() {
   M5.Lcd.fillRect(0, 0, lcd_width, lcd_height, BLACK);
@@ -53,14 +56,22 @@ public:
 
   virtual void draw() const {
   }
+
+  int calculation_x(int shift_x){
+    return lcd_width_center - shift_x;
+  }
+  int calculation_y(int shift_y)
+    return lcd_height_center - shift_y;
+  }
+
 };
 
 class FaseClass1 : public FaseClass {
 public:
   void draw() const override {
-    M5.Lcd.fillRect(50, 30, 5, 30, WHITE);
-    M5.Lcd.fillRect(70, 30, 5, 30, WHITE);
-    M5.Lcd.fillRect(60, 50, 30, 5, WHITE);
+    M5.Lcd.fillRect(calculation_x(300), 130, 5, 30, WHITE);
+    M5.Lcd.fillRect(70, 130, 5, 30, WHITE);
+    M5.Lcd.fillRect(60, 150, 30, 5, WHITE);
   }
 };
 
@@ -68,9 +79,9 @@ public:
 class FaseClass2 : public FaseClass {
 public:
   void draw() const override {
-    M5.Lcd.fillRect(50, 30, 30, 5, WHITE);
-    M5.Lcd.fillRect(70, 30, 30, 5, WHITE);
-    M5.Lcd.fillRect(60, 50, 30, 5, WHITE);
+    M5.Lcd.fillRect(50, 130, 30, 5, WHITE);
+    M5.Lcd.fillRect(70, 190, 30, 5, WHITE);
+    M5.Lcd.fillRect(60, 200, 30, 5, WHITE);
   }
 };
 
@@ -116,12 +127,23 @@ public:
     set_operation_time();
   }
 
-  void game_sec102() {
+  void game_loss(){ //見つからなかった時の処理
+    TouchPoint_t pos = M5.Touch.getPressPoint();
+    const int xpos = pos.x;
+    const int ypos = pos.y;
+
+    if (xpos == -1) { return; };
+    set_game_transition(102);
+    set_operation_time();
+  }
+
+  void game_sec102() { //ユーザー終了待機処理
     TouchPoint_t pos = M5.Touch.getPressPoint();
     const int xpos = pos.x;
     const int ypos = pos.y;
     if (xpos == -1) { return; };
     set_game_transition(900);
+    fase_class1->face_draw();
   }
 
   void game_exit() {  //ゲーム終了処理
@@ -132,10 +154,12 @@ public:
 
   void game_sec2() {
     game_clear();
+    fase_class2->face_draw();
   }
   void game_sec3() {
     // M5.Speaker.beep();        // ビープ開始
     game_clear();
+    fase_class1->face_draw();
   }
 
 
@@ -173,6 +197,7 @@ public:
         game_sec3();
         break;
       case 4:  //見つからなかった
+
         break;
       case 102:  //見つかった！
 
@@ -185,7 +210,7 @@ public:
       case 900:  //終了関数
 
         game_exit();
-        clear();
+        lcd_clear();
 
 
         break;
